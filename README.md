@@ -156,7 +156,8 @@ cd kloppy
 
 ```sh
 pip install uv
-uv sync --all-extras                     # creates .venv and installs kloppy, all extras and the dev tools
+uv python install 3.12                   # uv downloads a supported Python (3.9 to 3.13 are tested)
+uv sync --all-extras --python 3.12       # creates .venv and installs kloppy, all extras and the dev tools
 uv run python -m pytest kloppy/tests     # run the full test suite
 uv build                                 # optional: build the wheel and sdist into dist/
 ```
