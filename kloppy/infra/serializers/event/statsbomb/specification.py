@@ -930,12 +930,13 @@ class DUEL(EVENT):
             DUEL.OUTCOME.SUCCESS_IN_PLAY,
             DUEL.OUTCOME.SUCCESS_OUT,
         ]
-        result = (
-            DuelResult.WON
-            if type_id != DUEL.TYPE.AERIAL_LOST
-            and DUEL.OUTCOME(duel_dict.get("outcome", {})) in duel_won_outcomes
-            else DuelResult.LOST
+        is_aerial_duel_lost = type_id == DUEL.TYPE.AERIAL_LOST
+        raw_outcome = duel_dict.get("outcome", {})
+        is_duel_won = (
+            not is_aerial_duel_lost
+            and DUEL.OUTCOME(raw_outcome) in duel_won_outcomes
         )
+        result = DuelResult.WON if is_duel_won else DuelResult.LOST
 
         duel_event = event_factory.build_duel(
             result=result,
