@@ -497,6 +497,34 @@ def _parse_ball_out(raw_event: dict) -> dict:
     return {"result": None, "qualifiers": qualifiers}
 
 
+def _is_free_kick_shot(raw_event: dict) -> bool:
+    """Free kick that was taken as a direct shot on goal."""
+    return (
+        raw_event["type"]["primary"] == "free_kick"
+        and "free_kick_shot" in raw_event["type"]["secondary"]
+    )
+
+
+def _is_free_kick_pass(raw_event: dict) -> bool:
+    """Free kick that was played as a pass."""
+    is_free_kick = raw_event["type"]["primary"] == "free_kick"
+    return is_free_kick and not _is_free_kick_shot(raw_event)
+
+
+def _is_corner_shot(raw_event: dict) -> bool:
+    """Corner kick that was taken as a direct shot on goal."""
+    return (
+        raw_event["type"]["primary"] == "corner"
+        and "shot" in raw_event["type"]["secondary"]
+    )
+
+
+def _is_corner_pass(raw_event: dict) -> bool:
+    """Corner kick that was played as a pass."""
+    is_corner = raw_event["type"]["primary"] == "corner"
+    return is_corner and not _is_corner_shot(raw_event)
+
+
 def _parse_set_piece(raw_event: dict, next_event: dict, team: Team) -> dict:
     qualifiers = _generic_qualifiers(raw_event)
     result = {}
@@ -509,25 +537,17 @@ def _parse_set_piece(raw_event: dict, next_event: dict, team: Team) -> dict:
         qualifiers.append(SetPieceQualifier(SetPieceType.THROW_IN))
         qualifiers.append(PassQualifier(PassType.HAND_PASS))
         result = _parse_pass(raw_event, next_event, team)
-    elif (
-        raw_event["type"]["primary"] == "free_kick"
-    ) and "free_kick_shot" not in raw_event["type"]["secondary"]:
+    elif _is_free_kick_pass(raw_event):
         qualifiers.append(SetPieceQualifier(SetPieceType.FREE_KICK))
         result = _parse_pass(raw_event, next_event, team)
-    elif (raw_event["type"]["primary"] == "corner") and "shot" not in raw_event[
-        "type"
-    ]["secondary"]:
+    elif _is_corner_pass(raw_event):
         qualifiers.append(SetPieceQualifier(SetPieceType.CORNER_KICK))
         result = _parse_pass(raw_event, next_event, team)
     # Shot set pieces
-    elif (
-        raw_event["type"]["primary"] == "free_kick"
-    ) and "free_kick_shot" in raw_event["type"]["secondary"]:
+    elif _is_free_kick_shot(raw_event):
         qualifiers.append(SetPieceQualifier(SetPieceType.FREE_KICK))
         result = _parse_shot(raw_event)
-    elif (raw_event["type"]["primary"] == "corner") and "shot" in raw_event[
-        "type"
-    ]["secondary"]:
+    elif _is_corner_shot(raw_event):
         qualifiers.append(SetPieceQualifier(SetPieceType.CORNER_KICK))
         result = _parse_shot(raw_event)
     elif raw_event["type"]["primary"] == "penalty":
