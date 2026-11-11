@@ -450,64 +450,66 @@ class AttackingDirection(Enum):
         if orientation == Orientation.STATIC_AWAY_HOME:
             return AttackingDirection.RTL
         if orientation == Orientation.HOME_AWAY:
-            if period is None:
-                raise OrientationError(
-                    "You must provide a period to determine the attacking direction"
-                )
-            dirmap = {
-                1: AttackingDirection.LTR,
-                2: AttackingDirection.RTL,
-                3: AttackingDirection.LTR,
-                4: AttackingDirection.RTL,
-            }
-            if period.id in dirmap:
-                return dirmap[period.id]
-            raise OrientationError(
-                f"This orientation is not defined for period {period.id}"
+            return AttackingDirection._from_period(
+                period,
+                odd_period_direction=AttackingDirection.LTR,
+                even_period_direction=AttackingDirection.RTL,
             )
         if orientation == Orientation.AWAY_HOME:
-            if period is None:
-                raise OrientationError(
-                    "You must provide a period to determine the attacking direction"
-                )
-            dirmap = {
-                1: AttackingDirection.RTL,
-                2: AttackingDirection.LTR,
-                3: AttackingDirection.RTL,
-                4: AttackingDirection.LTR,
-            }
-            if period.id in dirmap:
-                return dirmap[period.id]
-            raise OrientationError(
-                f"This orientation is not defined for period {period.id}"
+            return AttackingDirection._from_period(
+                period,
+                odd_period_direction=AttackingDirection.RTL,
+                even_period_direction=AttackingDirection.LTR,
             )
         if orientation == Orientation.BALL_OWNING_TEAM:
             if ball_owning_team is None:
                 raise OrientationError(
                     "You must provide the ball owning team to determine the attacking direction"
                 )
-            if ball_owning_team is not None:
-                if ball_owning_team.ground == Ground.HOME:
-                    return AttackingDirection.LTR
-                if ball_owning_team.ground == Ground.AWAY:
-                    return AttackingDirection.RTL
-                raise OrientationError(
-                    "Invalid ball_owning_team: %s", ball_owning_team
-                )
-            return AttackingDirection.NOT_SET
+            return AttackingDirection._from_team_ground(
+                ball_owning_team, team_role="ball_owning_team"
+            )
         if orientation == Orientation.ACTION_EXECUTING_TEAM:
             if action_executing_team is None:
                 raise ValueError(
                     "You must provide the action executing team to determine the attacking direction"
                 )
-            if action_executing_team.ground == Ground.HOME:
-                return AttackingDirection.LTR
-            if action_executing_team.ground == Ground.AWAY:
-                return AttackingDirection.RTL
-            raise OrientationError(
-                "Invalid action_executing_team: %s", action_executing_team
+            return AttackingDirection._from_team_ground(
+                action_executing_team, team_role="action_executing_team"
             )
         raise OrientationError("Unknown orientation: %s", orientation)
+
+    @staticmethod
+    def _from_period(
+        period: Optional[Period],
+        odd_period_direction: "AttackingDirection",
+        even_period_direction: "AttackingDirection",
+    ) -> "AttackingDirection":
+        """Attacking direction when the teams switch sides every period."""
+        if period is None:
+            raise OrientationError(
+                "You must provide a period to determine the attacking direction"
+            )
+        direction_by_period_id = {
+            1: odd_period_direction,
+            2: even_period_direction,
+            3: odd_period_direction,
+            4: even_period_direction,
+        }
+        if period.id in direction_by_period_id:
+            return direction_by_period_id[period.id]
+        raise OrientationError(
+            f"This orientation is not defined for period {period.id}"
+        )
+
+    @staticmethod
+    def _from_team_ground(team: Team, team_role: str) -> "AttackingDirection":
+        """Attacking direction based on whether the team plays home or away."""
+        if team.ground == Ground.HOME:
+            return AttackingDirection.LTR
+        if team.ground == Ground.AWAY:
+            return AttackingDirection.RTL
+        raise OrientationError(f"Invalid {team_role}: %s", team)
 
     def __repr__(self):
         return self.value
