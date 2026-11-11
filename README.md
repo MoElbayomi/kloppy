@@ -16,6 +16,7 @@ Each data provider uses its own proprietary formats, event definitions, and coor
 - [Supported data providers](#supported-data-providers)
 - [Main features](#main-features)
 - [Where to get it](#where-to-get-it)
+- [Building from source and running the tests](#building-from-source-and-running-the-tests)
 - [Documentation](#documentation)
 - [Contributing to kloppy](#contributing-to-kloppy)
 - [License](#license)
@@ -139,6 +140,38 @@ pip install git+https://github.com/PySport/kloppy.git
 ```
 
 For more details, refer to the [installation guide](https://kloppy.pysport.org/getting-started/installation/).
+
+## Building from source and running the tests
+
+Requirements: Python 3.9 to 3.13 and Git. The commands below work on Linux, macOS and Windows.
+
+**1. Get the code**
+
+```sh
+git clone https://github.com/PySport/kloppy.git
+cd kloppy
+```
+
+**2a. Set up with [uv](https://docs.astral.sh/uv/) (recommended, same setup as the CI)**
+
+```sh
+pip install uv
+uv sync --all-extras                     # creates .venv and installs kloppy, all extras and the dev tools
+uv run python -m pytest kloppy/tests     # run the full test suite
+uv build                                 # optional: build the wheel and sdist into dist/
+```
+
+**2b. Or set up with plain pip**
+
+```sh
+python -m venv .venv
+source .venv/bin/activate                # on Windows: .venv\Scripts\activate
+pip install -e ".[query,s3,pandas,polars,pyarrow]"
+pip install -r requirements-dev.txt      # pytest, pytest plugins, moto, ruff, pre-commit
+python -m pytest kloppy/tests            # run the full test suite
+```
+
+The extras are needed because some tests use pandas/polars and some mock S3. All tests should pass.
 
 ## Documentation
 

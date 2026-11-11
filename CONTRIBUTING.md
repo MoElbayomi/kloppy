@@ -20,8 +20,9 @@ please specify if it relates to any existing issues.
 
 ## Project Setup
 
-After you have forked the code and cloned it to your machine, execute the command `pip install -r requirements.txt` 
-in order to install all necessary project dependencies.
+After you have forked the code and cloned it to your machine, follow the steps in
+[Building from source and running the tests](README.md#building-from-source-and-running-the-tests)
+to install all necessary project dependencies and run the test suite.
 
 ### Code Formatting
 
