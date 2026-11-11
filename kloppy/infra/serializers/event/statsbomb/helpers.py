@@ -18,8 +18,10 @@ from kloppy.exceptions import DeserializationError
 
 def parse_str_ts(timestamp: str) -> float:
     """Parse a HH:mm:ss string timestamp into number of seconds."""
-    h, m, s = timestamp.split(":")
-    return timedelta(seconds=int(h) * 3600 + int(m) * 60 + float(s))
+    hours, minutes, seconds = timestamp.split(":")
+    return timedelta(
+        seconds=int(hours) * 3600 + int(minutes) * 60 + float(seconds)
+    )
 
 
 def parse_obv_values(raw_event: dict) -> Optional[ActionValue]:

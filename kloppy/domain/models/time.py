@@ -210,8 +210,8 @@ class Time:
         )
 
     def __str__(self):
-        m, s = divmod(self.timestamp.total_seconds(), 60)
-        return f"P{self.period.id}T{m:02.0f}:{s:02.0f}"
+        minutes, seconds = divmod(self.timestamp.total_seconds(), 60)
+        return f"P{self.period.id}T{minutes:02.0f}:{seconds:02.0f}"
 
     def __hash__(self):
         return hash((self.period.id, self.timestamp.total_seconds()))
